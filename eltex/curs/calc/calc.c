@@ -7,8 +7,10 @@
 #define DIV_ITEM 4
 #define CADD_ITEM 5
 #define CSUB_ITEM 6
+#define CMUL_ITEM 7
+#define CDIV_ITEM 8
 
-#define EXIT_ITEM 7
+#define EXIT_ITEM 9
 
 int exe_menu()
 {
@@ -23,10 +25,12 @@ int exe_menu()
         "Complex operations:\n"
         "\t5) Add: (a + bi) + (c + di)\n"
         "\t6) Substraction: (a + bi) - (c + di)\n"
+        "\t7) Multiplication: (a + bi) * (c + di)\n"
+        "\t8) Division: (a + bi) / (c + di)\n"
         "\n"
         "\t%d) Exit\n", EXIT_ITEM);
         printf("$");
-        while(menu_item < 1 || menu_item > 6){
+        while(menu_item < 1 || menu_item > 8){
                 scanf("%d", &menu_item);
                 if(menu_item == EXIT_ITEM)
                         return EXIT_ITEM;
@@ -91,6 +95,24 @@ void exe_menu_item(int menu_item)
                         com_b.im = d;
                         com_c = mSubComplex(com_a, com_b);
                         printf("(%.2f + %.2fi) - (%.2f + %.2fi) = %.2f + %.2fi\n", a, b, c, d, com_c.re, com_c.im);
+                break;
+                case CMUL_ITEM:
+                        get_input_complex_var(&a, &b, &c, &d);
+                        com_a.re = a;
+                        com_a.im = b;
+                        com_b.re = c;
+                        com_b.im = d;
+                        com_c = mMulComplex(com_a, com_b);
+                        printf("(%.2f + %.2fi) * (%.2f + %.2fi) = %.2f + %.2fi\n", a, b, c, d, com_c.re, com_c.im);
+                break;
+                case CDIV_ITEM:
+                        get_input_complex_var(&a, &b, &c, &d);
+                        com_a.re = a;
+                        com_a.im = b;
+                        com_b.re = c;
+                        com_b.im = d;
+                        com_c = mDivComplex(com_a, com_b);
+                        printf("(%.2f + %.2fi) / (%.2f + %.2fi) = %.2f + %.2fi\n", a, b, c, d, com_c.re, com_c.im);
                 break;
         }
 }
