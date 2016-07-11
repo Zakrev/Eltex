@@ -1,5 +1,8 @@
 #include "complex.h"
 
+int function_count = 4;
+char function_info[300] = "mAddComplex.Add complex: (a + bi) + (c + di).mSubComplex.Substraction complex: (a + bi) - (c + di).mMulComplex.Multiplication complex: (a + bi) * (c + di).mDivComplex.Division complex: (a + bi) / (c + di)";
+
 struct mComplex mAddComplex(struct mComplex a, struct mComplex b)
 {
         struct mComplex c;
