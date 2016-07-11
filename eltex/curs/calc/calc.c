@@ -59,7 +59,7 @@ void LoadAndAddLib(char* lib_name, struct Menu* menu)
         for(i = 0; i < *function_count && lenght != -1; i++){
                 lenght +=  ParseInfo(function_info + lenght, func_name, func_desc);
                 strcpy(menu->func_desc[menu->func_count], func_desc);
-                //menu->functions[menu->func_count] = dlsym(lib_id, func_name);
+                menu->functions[menu->func_count] = dlsym(lib_id, func_name);
                 menu->func_count += 1;
         }
 }
@@ -88,37 +88,54 @@ int CreateMenu(struct Menu* menu)
 int ExeMenu(struct Menu menu)
 {
         int i;
+        int menu_item = -1;
 
         printf("Welcome to Calculator!\n");
         for(i = 0; i < menu.func_count; i++){
                 printf("\t%d) %s\n", i + 1, menu.func_desc[i]);
         }
         printf("\t%d) Exit.\n", i + 1);
-        printf("$");
 
-        return 0;
+        while(menu_item < 1 || menu.func_count + 1 < menu_item){
+                printf("$ ");
+                scanf("%d", &menu_item);
+        }
+
+        return menu_item;
 }
 
 
-void ExeMenuItem(int menu_item)
+void GetInputVar(double* a, double* b)
 {
-
+        printf("a: ");
+        scanf("%lf", a);
+        printf("b: ");
+        scanf("%lf", b);
 }
 
-double (*func_init) (double, double);
+void ExeMenuItem(struct Menu menu, int menu_item)
+{
+        if(menu_item > menu.func_count)
+                return;
+
+        double (*func_init) (double, double);
+        double a, b;
+
+        GetInputVar(&a, &b);
+        func_init = menu.functions[menu_item - 1];
+        printf("%s = %.2f\n", menu.func_desc[menu_item - 1], func_init(a, b));
+}
 
 int main()
 {
-        /*int menu_item = -1;
-
-        while(menu_item != EXIT_ITEM){
-                menu_item = exe_menu();
-                exe_menu_item(menu_item);
-        }*/
+        int menu_item = -1;
         struct Menu menu;
-        
+
         CreateMenu(&menu);
-        ExeMenu(menu);
+        while(menu_item != menu.func_count + 1){
+                menu_item = ExeMenu(menu);
+                ExeMenuItem(menu, menu_item);
+        }
         
         return 0;
 }
