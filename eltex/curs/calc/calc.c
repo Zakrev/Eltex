@@ -4,11 +4,13 @@
 #include <string.h>
 
 #define MAX_FUNC_COUNT 10
+#define MAX_STR_LEN 128
 #define ER_CANT_EXE_POPEN "Error: Cant execute command popen\n"
 
 struct Menu {
-        void** functions;
-        char** func_desc;
+        char lib_name[MAX_FUNC_COUNT][MAX_STR_LEN];
+        char func_name[MAX_FUNC_COUNT][MAX_STR_LEN];
+        char func_desc[MAX_FUNC_COUNT][MAX_STR_LEN];
         int func_count;
 };
 
@@ -69,8 +71,8 @@ void LoadAndAddLib(char* lib_name, struct Menu* menu)
         char* error_open;
         int* function_count;
         char* function_info;
-        char func_name[128];
-        char func_desc[128];
+        char func_name[MAX_STR_LEN];
+        char func_desc[MAX_STR_LEN];
         int i;
         size_t lenght = 0;
 
@@ -82,19 +84,20 @@ void LoadAndAddLib(char* lib_name, struct Menu* menu)
         }
         function_count = (int*)dlsym(lib_id, "function_count");
         function_info = (char*)dlsym(lib_id, "function_info");
-        printf("\tlib %s include %d functions.\n", lib_name, *function_count);
         for(i = 0; i < *function_count && lenght != -1 && menu->func_count < MAX_FUNC_COUNT; i++){
                 lenght +=  ParseInfo(function_info + lenght, func_name, func_desc);
                 strcpy(menu->func_desc[menu->func_count], func_desc);
-                menu->functions[menu->func_count] = dlsym(lib_id, func_name);
+                strcpy(menu->func_name[menu->func_count], func_name);
+                strcpy(menu->lib_name[menu->func_count], lib_name);
                 menu->func_count += 1;
         }
+        dlclose(lib_id);
+        printf("\tlib %s include %d functions.\n", lib_name, i);
 }
 
 int CreateMenu(struct Menu* menu)
 {
         char lib_name[254] = "./";
-        int i;
         FILE* popen_res;
        
         system("clear");
@@ -105,10 +108,6 @@ int CreateMenu(struct Menu* menu)
                 return -1;
         }
 
-        menu->functions = malloc(sizeof(void*) * MAX_FUNC_COUNT);
-        menu->func_desc = malloc(sizeof(char*) * MAX_FUNC_COUNT);
-        for(i = 0; i < MAX_FUNC_COUNT; i++)
-                menu->func_desc[i] = malloc(129);
         menu->func_count = 0;
         
         printf("Load library.\n");
@@ -123,12 +122,6 @@ int CreateMenu(struct Menu* menu)
 
 void ClearMenu(struct Menu* menu)
 {
-        int i;
-        
-        for(i = 0; i < MAX_FUNC_COUNT; i++)
-                free(menu->func_desc[i]);
-        free(menu->func_desc);
-        free(menu->functions);
 }
 
 int ExeMenu(struct Menu menu)
@@ -136,7 +129,7 @@ int ExeMenu(struct Menu menu)
         int i;
         int menu_item = -1;
 
-        //printf("Welcome to Calculator!\n");
+        printf("Welcome to Calculator!\n");
         for(i = 0; i < menu.func_count; i++){
                 printf("\t%d) %s\n", i + 1, menu.func_desc[i]);
         }
@@ -173,13 +166,24 @@ void ExeMenuItem(struct Menu menu, int menu_item)
 
         double (*func_init) (double, double);
         double a, b;
+        char* error_open;
+        void* lib_id;
+
+        lib_id = dlopen(menu.lib_name[menu_item - 1], RTLD_NOW);
+        error_open = dlerror();
+        if(error_open != NULL){
+                printf("Error: %s\n", error_open);
+                return;
+        }
 
         system("clear");
         printf("%s\n", menu.func_desc[menu_item - 1]);
         GetInputVar(&a, &b);
-        func_init = menu.functions[menu_item - 1];
+        
+        func_init = (double*)dlsym(lib_id, menu.func_name[menu_item - 1]);
         system("clear");
         printf("%s = %.2f\n", menu.func_desc[menu_item - 1], func_init(a, b));
+        dlclose(lib_id);
 }
 
 int main()
