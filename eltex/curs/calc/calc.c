@@ -3,11 +3,38 @@
 #include <dlfcn.h>
 #include <string.h>
 
+#define MAX_FUNC_COUNT 10
+#define ER_CANT_EXE_POPEN "Error: Cant execute command popen\n"
+
 struct Menu {
         void** functions;
         char** func_desc;
         int func_count;
 };
+
+int scan_int(int* value)
+{
+        char buff[32];
+
+        scanf("%s", buff);
+        if(buff[0] < '0' || buff[0] > '9')
+                return -1;
+        *value = atoi(buff);
+
+        return 0;
+}
+
+int scan_double(double* value)
+{
+        char buff[64];
+
+        scanf("%s", buff);
+        if(buff[0] < '0' || buff[0] > '9')
+                return -1;
+        *value = atof(buff);
+
+        return 0;
+}
 
 size_t FindCh(char* str, char ch)
 {
@@ -56,7 +83,7 @@ void LoadAndAddLib(char* lib_name, struct Menu* menu)
         function_count = (int*)dlsym(lib_id, "function_count");
         function_info = (char*)dlsym(lib_id, "function_info");
         printf("\tlib %s include %d functions.\n", lib_name, *function_count);
-        for(i = 0; i < *function_count && lenght != -1; i++){
+        for(i = 0; i < *function_count && lenght != -1 && menu->func_count < MAX_FUNC_COUNT; i++){
                 lenght +=  ParseInfo(function_info + lenght, func_name, func_desc);
                 strcpy(menu->func_desc[menu->func_count], func_desc);
                 menu->functions[menu->func_count] = dlsym(lib_id, func_name);
@@ -72,25 +99,36 @@ int CreateMenu(struct Menu* menu)
        
         system("clear");
 
-        popen_res = popen("ls plugin/*.so 2> dev\\null", "r");
+        popen_res = (FILE*)popen("ls plugin/*.so 2> \\dev\\null", "r");
         if(!popen_res){
-                printf("Error: Cant execute command popen!\n");
+                printf(ER_CANT_EXE_POPEN);
                 return -1;
         }
 
-        menu->functions = malloc(sizeof(void*) * 10);
-        menu->func_desc = malloc(sizeof(char*) * 10);
-        for(i = 0; i < 10; i++)
+        menu->functions = malloc(sizeof(void*) * MAX_FUNC_COUNT);
+        menu->func_desc = malloc(sizeof(char*) * MAX_FUNC_COUNT);
+        for(i = 0; i < MAX_FUNC_COUNT; i++)
                 menu->func_desc[i] = malloc(129);
         menu->func_count = 0;
         
-        printf("Load library:\n");
+        printf("Load library.\n");
         while(fgets(lib_name+2, sizeof(lib_name) - 2, popen_res) != NULL){
                 lib_name[FindCh(lib_name, '\n')] = '\0';
                 LoadAndAddLib(lib_name, menu);
         }
-
+        pclose(popen_res);
+        printf("\tLoaded %d functions.\n", menu->func_count);
         return 0;
+}
+
+void ClearMenu(struct Menu* menu)
+{
+        int i;
+        
+        for(i = 0; i < MAX_FUNC_COUNT; i++)
+                free(menu->func_desc[i]);
+        free(menu->func_desc);
+        free(menu->functions);
 }
 
 int ExeMenu(struct Menu menu)
@@ -104,9 +142,9 @@ int ExeMenu(struct Menu menu)
         }
         printf("\t%d) Exit.\n", i + 1);
 
-        while(menu_item < 1 || menu.func_count + 1 < menu_item){
+        while(menu_item < 1 || menu.func_count + 1 < menu_item || i == -1){
                 printf("$ ");
-                scanf("%d", &menu_item);
+                i = scan_int(&menu_item);
         }
 
         return menu_item;
@@ -115,10 +153,17 @@ int ExeMenu(struct Menu menu)
 
 void GetInputVar(double* a, double* b)
 {
-        printf("a: ");
-        scanf("%lf", a);
-        printf("b: ");
-        scanf("%lf", b);
+        int i = -1;
+
+        while(i == -1){
+                printf("a: ");
+                i = scan_double(a);
+        }
+        i = -1;
+        while(i == -1){
+                printf("b: ");
+                i = scan_double(b);
+        }
 }
 
 void ExeMenuItem(struct Menu menu, int menu_item)
@@ -148,6 +193,7 @@ int main()
                 menu_item = ExeMenu(menu);
                 ExeMenuItem(menu, menu_item);
         }
+        ClearMenu(&menu);
         system("clear");
 
         return 0;
