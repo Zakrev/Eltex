@@ -136,7 +136,7 @@ int ExeMenu(struct Menu menu)
         int i;
         int menu_item = -1;
 
-        printf("Welcome to Calculator!\n");
+        //printf("Welcome to Calculator!\n");
         for(i = 0; i < menu.func_count; i++){
                 printf("\t%d) %s\n", i + 1, menu.func_desc[i]);
         }
