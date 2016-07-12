@@ -66,9 +66,18 @@ void LoadAndAddLib(char* lib_name, struct Menu* menu)
 
 int CreateMenu(struct Menu* menu)
 {
-        char lib_name[20] = "";
+        char lib_name[254] = "./";
         int i;
-        
+        FILE* popen_res;
+       
+        system("clear");
+
+        popen_res = popen("ls plugin/*.so 2> dev\\null", "r");
+        if(!popen_res){
+                printf("Error: Cant execute command popen!\n");
+                return -1;
+        }
+
         menu->functions = malloc(sizeof(void*) * 10);
         menu->func_desc = malloc(sizeof(char*) * 10);
         for(i = 0; i < 10; i++)
@@ -76,10 +85,9 @@ int CreateMenu(struct Menu* menu)
         menu->func_count = 0;
         
         printf("Load library:\n");
-        scanf("%s", lib_name);
-        while(strcmp(lib_name, "end") != 0){
+        while(fgets(lib_name+2, sizeof(lib_name) - 2, popen_res) != NULL){
+                lib_name[FindCh(lib_name, '\n')] = '\0';
                 LoadAndAddLib(lib_name, menu);
-                scanf("%s", lib_name);
         }
 
         return 0;
@@ -121,8 +129,11 @@ void ExeMenuItem(struct Menu menu, int menu_item)
         double (*func_init) (double, double);
         double a, b;
 
+        system("clear");
+        printf("%s\n", menu.func_desc[menu_item - 1]);
         GetInputVar(&a, &b);
         func_init = menu.functions[menu_item - 1];
+        system("clear");
         printf("%s = %.2f\n", menu.func_desc[menu_item - 1], func_init(a, b));
 }
 
@@ -131,11 +142,13 @@ int main()
         int menu_item = -1;
         struct Menu menu;
 
-        CreateMenu(&menu);
+        if( CreateMenu(&menu) != 0 )
+                return 0;
         while(menu_item != menu.func_count + 1){
                 menu_item = ExeMenu(menu);
                 ExeMenuItem(menu, menu_item);
         }
-        
+        system("clear");
+
         return 0;
 }
