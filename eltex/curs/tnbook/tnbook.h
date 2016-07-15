@@ -13,7 +13,7 @@
 #define MC_TO_RIGHT 2
 #define MC_TO_UP 3
 #define MC_TO_DOWN 4
-
+#define MFILE struct mOpenFile
 #define MEDITW struct mEditWin
 #define SIZE_CONST 8
 MCURSOR {
@@ -21,14 +21,22 @@ MCURSOR {
         int col;
 };
 
+MFILE {
+        int filed;//оригинальный файл
+        int tmpd;//рабочий файл
+        off_t first_line;//Начало первой линии входящей в редактор
+        off_t last_line;//конец последней линии также
+        off_t curs_pos;//текущая позиция курсора (в обоих файлах)
+        off_t copy_pos;//Последний скопированный символ (чтоб не переписывать рабочий файл)
+};
+
 MEDITW {
         WINDOW *mbox;
         WINDOW *text;
         MCURSOR cursor;
-        int row;
-        int col;
-        int filed;
-        int fpos;
+        MFILE file;
+        int row;//размер в строках
+        int col;//размер в столбцах
         char *buff;
 };
 
