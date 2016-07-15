@@ -24,8 +24,11 @@ MCURSOR {
 MFILE {
         int filed;//оригинальный файл
         int tmpd;//рабочий файл
-        off_t first_line;//Начало первой линии входящей в редактор
-        off_t last_line;//конец последней линии также
+        off_t first_line;//Начало первой линии входящей в буфер редактора
+        /*
+                Позиция (0;0) в окне, "равна" позиции first_line указателя в файле
+        */
+        off_t last_line;//конец последней линии входящей в буфер редактора (не в окно)
         off_t curs_pos;//текущая позиция курсора (в обоих файлах)
         off_t copy_pos;//Последний скопированный символ (чтоб не переписывать рабочий файл)
 };
@@ -37,6 +40,7 @@ MEDITW {
         MFILE file;
         int row;//размер в строках
         int col;//размер в столбцах
+        int end_line;//позиция последнего символа текущей (MCURSOR.row) строки
         char *buff;
 };
 
@@ -50,3 +54,7 @@ int MoveCursorToRowCol(MEDITW *, int , int);
 int MoveCursorTo(MEDITW *, int);
 int PrintNewLine(MEDITW *);
 int PrintCh(MEDITW *, char);
+void ClearBuffer(char* , int);
+void ScrollDown(MEDITW *);
+void ScrollUp(MEDITW *);
+void OpenAndPrintFile(MEDITW *);

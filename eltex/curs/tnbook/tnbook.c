@@ -33,6 +33,8 @@ void CreateDataText(MEDITW *editw)
         editw->col = w_col - 2;
         editw->text = tbox;
         editw->buff = malloc(editw->row * editw->col);
+        editw->cursor.row = 0;
+        editw->cursor.col = 0;
 }
 
 void DeleteDataText(MEDITW *editw)
@@ -66,11 +68,47 @@ WINDOW *DrawMMenuText(WINDOW *mmenu_box, char *text)
         return tbox;
 }
 
+int FindEndLine(char *buff, int line_size)
+{
+        int i;
+        
+        for(i = 0; i < line_size - 1 && buff[i] != '\n' && buff[i] != '\0'; i++);
+
+        if(buff[i] == '\0')
+                return i - 1;
+        
+        return i;
+}
+
 int MoveCursorToRowCol(MEDITW *editw, int row, int col)
 {
+        int new_line_size;
+        int end_line = editw->end_line;
+        off_t curs_pos = editw->file.curs_pos;
+
+        if(col > editw->col)
+                return -1;
+        if(col < 0)
+                return -1;
+        if(row + 1 > editw->row){
+                ScrollDown(editw);
+                return -1;
+        }
+        if(row < 0){
+                ScrollUp(editw);
+                return -1;
+        }
+        /*if(editw->cursor.row < row){
+                new_line_size = FindEndLine(editw->buff + end_line + 1, editw->col);
+                end_line += new_line_size + 1;
+                if(col > new_line_size){
+                        col = new_line_size;
+                }
+        } */
         if( wmove(editw->text, row, col) != -1 ){
                 editw->cursor.row = row;
                 editw->cursor.col = col;
+                editw->end_line = end_line;
         } else 
                 return -1;
 
@@ -118,4 +156,100 @@ int PrintCh(MEDITW *editw, char ch)
         }
         
         return 0;
+}
+
+void ClearBuffer(char* buff, int size)
+{
+        int i;
+
+        for(i = 0; i < size; i++)
+                buff[i] = '\0';
+}
+
+void ScrollDown(MEDITW *editw)
+{
+        MFILE *file = &editw->file;
+        off_t old_first_line = file->first_line;
+        off_t new_ch_count;//Прочитанные новые символы из оригинального файла
+
+        if( (lseek(file->filed, 0, SEEK_END) - file->first_line) <= editw->col * editw->row)//Если файл закончился
+                return;
+
+        file->first_line = lseek(file->filed, file->first_line + editw->col, SEEK_SET);
+        ClearBuffer(editw->buff, editw->col * editw->row);
+        read(file->filed, editw->buff, editw->row * editw->col);
+        file->last_line = lseek(file->filed, 0, SEEK_CUR);
+        file->curs_pos += file->first_line - old_first_line;
+        lseek(file->filed, file->curs_pos, SEEK_SET);
+
+        new_ch_count = file->last_line - file->copy_pos;
+        if( new_ch_count > 0 ){
+                lseek(file->tmpd, file->copy_pos, SEEK_SET);
+                write(file->tmpd, editw->buff + ((file->last_line - file->first_line) - new_ch_count), new_ch_count);
+                file->copy_pos = lseek(file->tmpd, 0, SEEK_CUR);
+        }
+
+        werase(editw->text);
+        wrefresh(editw->text);
+        waddstr(editw->text, editw->buff);
+        wmove(editw->text, editw->cursor.row, editw->cursor.col);
+}
+
+void ScrollUp(MEDITW *editw)
+{
+        MFILE *file = &editw->file;
+        off_t old_first_line = file->first_line;
+
+        if(file->first_line == 0)
+                return;
+
+        if( (file->first_line -= editw->col) < 0 )
+                file->first_line = 0;
+        file->first_line = lseek(file->filed, file->first_line, SEEK_SET);
+        ClearBuffer(editw->buff, editw->col * editw->row);
+        read(file->filed, editw->buff, editw->row * editw->col);
+        file->last_line = lseek(file->filed, 0, SEEK_CUR);
+        file->curs_pos += file->first_line - old_first_line;
+        lseek(file->filed, file->curs_pos, SEEK_SET);
+        
+        werase(editw->text);
+        wrefresh(editw->text);
+        waddstr(editw->text, editw->buff);
+        wmove(editw->text, editw->cursor.row, editw->cursor.col);
+}
+
+void OpenAndPrintFile(MEDITW *editw)
+{
+        MFILE *file = &editw->file;
+        
+        file->filed = open("ej.txt", O_RDONLY);
+        if(file->filed == -1){
+                werase(editw->text);
+                /*
+                        ERROR
+                */
+                return;
+        }
+        file->tmpd = open("ej.txt.tmp", O_CREAT | O_RDWR, S_IRWXO | S_IRWXU | S_IRWXG);
+        if(file->tmpd == -1){
+                close(file->filed);
+                werase(editw->text);
+                /*
+                        ERROR
+                */
+                return;
+        }
+        file->first_line = file->curs_pos = file->copy_pos = lseek(file->filed, 0, SEEK_SET);
+        ClearBuffer(editw->buff, editw->col * editw->row);
+        read(file->filed, editw->buff, editw->row * editw->col);
+        editw->end_line = FindEndLine(editw->buff, editw->col);
+        file->last_line = lseek(file->filed, 0, SEEK_CUR);
+        lseek(file->filed, 0, SEEK_SET);
+        
+        lseek(file->tmpd, 0, SEEK_SET);
+        write(file->tmpd, editw->buff, file->last_line - file->copy_pos);
+        file->copy_pos = lseek(file->tmpd, 0, SEEK_CUR);
+        
+        waddstr(editw->text, editw->buff);
+        MoveCursorToRowCol(editw, 0, 0);
 }
