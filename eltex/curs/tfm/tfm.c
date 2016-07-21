@@ -153,14 +153,20 @@ int CreateDInfoList(TREE_WIN *twin)
         return 0;
 }
 
-void MakeName(char *str, struct stat sb, char *name)
+void MakeName(char *str, struct stat *sb, char *name)
 {
-        switch(sb.st_mode & S_IFMT){
+        if(sb == NULL){
+                sprintf(str, "? %s", name);
+                
+                return;
+        }
+        
+        switch(sb->st_mode & S_IFMT){
                 case S_IFDIR:
                         sprintf(str, "/ %s", name);
                 break;
                 default:
-                        if(sb.st_mode & S_IXUSR || sb.st_mode & S_IXGRP || sb.st_mode & S_IXOTH)
+                        if(sb->st_mode & S_IXUSR || sb->st_mode & S_IXGRP || sb->st_mode & S_IXOTH)
                                 sprintf(str, "* %s", name);
                         else
                                 sprintf(str, "  %s", name);
@@ -184,14 +190,15 @@ void PrintDInfoList(TREE_WIN *twin, int start_index)
         for(i = start_index, j = 0; i < twin->name_list_d_size && j <= twin->nl_rows; i++, j++){
                 if(stat(name_list[i]->d_name, &stat_buff) > -1){
                         wmove(twin->name_list, j, 0);
-                        MakeName(tmp_str, stat_buff, name_list[i]->d_name);
+                        MakeName(tmp_str, &stat_buff, name_list[i]->d_name);
                         waddstr(twin->name_list, tmp_str);
                         sprintf(tmp_str, "%d", (int)stat_buff.st_size);
                         wmove(twin->info_list, j, 0);
                         waddstr(twin->info_list, tmp_str);
                 } else {
                         wmove(twin->name_list, j, 0);
-                        waddstr(twin->name_list, name_list[i]->d_name);
+                        MakeName(tmp_str, NULL, name_list[i]->d_name);
+                        waddstr(twin->name_list, tmp_str);
                 }
         }
         wrefresh(twin->name_list);
@@ -298,7 +305,7 @@ int EditFile(char *fname)
         pid = fork();
         
         if(pid == 0){
-                execlp("mc", "mc", "-e", fname, (char*)NULL);
+                execlp("medit", "medit", fname, (char*)NULL);
         } else {
                 endwin();
                 wait(0);
