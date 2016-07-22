@@ -1,0 +1,232 @@
+Client(7): pop 0 from Sklad 5(0)
+Client(8): pop 0 from Sklad 4(0)
+Client(9): pop 0 from Sklad 3(0)
+Client(9): pop 0 from Sklad 1(0)
+Client(10): pop 0 from Sklad 3(0)
+Loader: push 200 to Sklad 1. Summ 200
+Loader: push 200 to Sklad 2. Summ 200
+Loader: push 200 to Sklad 3. Summ 200
+Loader: push 91 to Sklad 4. Summ 91
+Loader: push 18 to Sklad 5. Summ 18
+Loader: not loaded 191
+Client(6): pop 48 from Sklad 4(43)
+Client(5): pop 18 from Sklad 5(0)
+Client(5): pop 0 from Sklad 5(0)
+Client(4): pop 89 from Sklad 1(111)
+Client(3): pop 0 from Sklad 5(0)
+Client(3): pop 95 from Sklad 2(105)
+Client(2): pop 0 from Sklad 5(0)
+Client(1): pop 89 from Sklad 1(22)
+Client(4): pop 23 from Sklad 4(20)
+Client(8): pop 10 from Sklad 2(95)
+Client(10): pop 48 from Sklad 2(47)
+Client(1): pop 87 from Sklad 3(113)
+Client(4): pop 83 from Sklad 3(30)
+Client(4): pop 22 from Sklad 1(0)
+Client(7): pop 21 from Sklad 2(26)
+Client(9): pop 0 from Sklad 5(0)
+Client(6): pop 20 from Sklad 4(0)
+Client(5): pop 30 from Sklad 3(0)
+Client(5): pop 9 from Sklad 2(17)
+Loader: push 200 to Sklad 1. Summ 200
+Loader: push 183 to Sklad 2. Summ 200
+Loader: push 200 to Sklad 3. Summ 200
+Loader: push 122 to Sklad 4. Summ 122
+Loader: push 102 to Sklad 5. Summ 102
+Loader: not loaded 93
+Client(3): pop 17 from Sklad 3(183)
+Client(2): pop 96 from Sklad 4(26)
+Client(5): pop 25 from Sklad 3(158)
+Client(9): pop 42 from Sklad 2(158)
+Client(9): pop 1 from Sklad 2(157)
+Client(10): pop 7 from Sklad 3(151)
+Client(3): pop 88 from Sklad 5(14)
+Client(3): pop 10 from Sklad 5(4)
+Client(8): pop 4 from Sklad 5(0)
+Client(8): pop 59 from Sklad 1(141)
+Client(1): pop 11 from Sklad 3(140)
+Client(1): pop 1 from Sklad 2(156)
+Client(10): pop 73 from Sklad 3(67)
+Client(4): pop 51 from Sklad 1(90)
+Client(7): pop 67 from Sklad 3(0)
+Client(6): pop 56 from Sklad 1(34)
+Client(2): pop 53 from Sklad 2(103)
+Loader: push 151 to Sklad 1. Summ 185
+Loader: push 48 to Sklad 2. Summ 151
+Loader: push 200 to Sklad 3. Summ 200
+Loader: push 174 to Sklad 4. Summ 200
+Loader: push 197 to Sklad 5. Summ 197
+Loader: not loaded 130
+Client(8): pop 25 from Sklad 4(175)
+Client(3): pop 67 from Sklad 3(133)
+Client(1): pop 77 from Sklad 3(56)
+Client(1): pop 82 from Sklad 1(103)
+Client(5): pop 12 from Sklad 5(185)
+Client(9): pop 82 from Sklad 1(21)
+Client(3): pop 57 from Sklad 4(118)
+Client(3): pop 86 from Sklad 5(99)
+Client(4): pop 7 from Sklad 4(111)
+Client(7): pop 85 from Sklad 2(66)
+Client(8): pop 66 from Sklad 2(0)
+Client(10): pop 10 from Sklad 1(11)
+Client(2): pop 15 from Sklad 4(96)
+Client(4): pop 20 from Sklad 5(79)
+Client(7): pop 49 from Sklad 4(47)
+Client(9): pop 79 from Sklad 5(0)
+Client(1): pop 10 from Sklad 3(46)
+Client(6): pop 0 from Sklad 2(0)
+Loader: push 189 to Sklad 1. Summ 200
+Loader: push 85 to Sklad 2. Summ 85
+Loader: push 154 to Sklad 3. Summ 200
+Loader: push 101 to Sklad 4. Summ 148
+Loader: push 41 to Sklad 5. Summ 41
+Loader: not loaded 330
+Client(5): pop 92 from Sklad 1(108)
+Client(7): pop 83 from Sklad 4(65)
+Client(8): pop 41 from Sklad 5(0)
+Client(3): pop 26 from Sklad 4(39)
+Client(10): pop 0 from Sklad 5(0)
+Client(5): pop 23 from Sklad 1(85)
+Client(2): pop 83 from Sklad 1(2)
+Client(2): pop 0 from Sklad 5(0)
+Client(4): pop 0 from Sklad 5(0)
+Client(2): pop 0 from Sklad 5(0)
+Client(1): pop 63 from Sklad 2(22)
+Client(5): pop 0 from Sklad 5(0)
+Client(5): pop 0 from Sklad 5(0)
+Client(9): pop 0 from Sklad 5(0)
+Client(8): pop 2 from Sklad 1(0)
+Client(8): pop 0 from Sklad 1(0)
+Client(10): pop 7 from Sklad 4(32)
+Client(6): pop 0 from Sklad 5(0)
+Client(7): pop 3 from Sklad 2(19)
+Client(7): pop 19 from Sklad 2(0)
+Loader: push 46 to Sklad 1. Summ 46
+Loader: push 200 to Sklad 2. Summ 200
+Loader: push 125 to Sklad 4. Summ 157
+Loader: push 59 to Sklad 5. Summ 59
+Loader: push 2 to Sklad 1. Summ 48
+Loader: not loaded 468
+Client(3): pop 59 from Sklad 5(0)
+Client(10): pop 0 from Sklad 5(0)
+Client(7): pop 40 from Sklad 1(8)
+Client(7): pop 55 from Sklad 4(102)
+Client(4): pop 49 from Sklad 4(53)
+Client(8): pop 90 from Sklad 3(110)
+Client(10): pop 51 from Sklad 4(2)
+Client(1): pop 0 from Sklad 5(0)
+Client(2): pop 2 from Sklad 4(0)
+Client(2): pop 37 from Sklad 2(163)
+Client(5): pop 0 from Sklad 4(0)
+Client(7): out
+Client(9): pop 15 from Sklad 2(148)
+Client(1): pop 0 from Sklad 4(0)
+Client(4): pop 0 from Sklad 5(0)
+Client(8): out
+Client(6): pop 33 from Sklad 2(115)
+Client(5): pop 50 from Sklad 3(60)
+Loader: push 192 to Sklad 1. Summ 200
+Loader: push 85 to Sklad 2. Summ 200
+Loader: push 140 to Sklad 3. Summ 200
+Loader: push 73 to Sklad 4. Summ 73
+Loader: push 200 to Sklad 5. Summ 200
+Loader: not loaded 210
+Client(3): out
+Client(2): pop 3 from Sklad 4(70)
+Client(9): pop 39 from Sklad 1(161)
+Client(10): pop 70 from Sklad 4(0)
+Client(4): pop 96 from Sklad 1(65)
+Client(10): pop 70 from Sklad 3(130)
+Client(1): out
+Client(6): pop 35 from Sklad 5(165)
+Client(5): pop 0 from Sklad 4(0)
+Client(4): pop 27 from Sklad 1(38)
+Client(4): pop 89 from Sklad 2(111)
+Client(4): pop 1 from Sklad 1(37)
+Client(9): pop 26 from Sklad 1(11)
+Loader: push 189 to Sklad 1. Summ 200
+Loader: push 89 to Sklad 2. Summ 200
+Loader: push 70 to Sklad 3. Summ 200
+Loader: push 200 to Sklad 4. Summ 200
+Loader: push 35 to Sklad 5. Summ 200
+Loader: not loaded 317
+Client(2): pop 15 from Sklad 2(185)
+Client(4): pop 45 from Sklad 2(140)
+Client(4): pop 48 from Sklad 3(152)
+Client(6): pop 10 from Sklad 3(142)
+Client(9): pop 33 from Sklad 4(167)
+Client(9): pop 26 from Sklad 1(174)
+Client(10): pop 2 from Sklad 4(165)
+Client(5): pop 32 from Sklad 1(142)
+Client(5): pop 15 from Sklad 3(127)
+Client(5): pop 37 from Sklad 5(163)
+Loader: push 58 to Sklad 1. Summ 200
+Loader: push 60 to Sklad 2. Summ 200
+Loader: push 73 to Sklad 3. Summ 200
+Loader: push 35 to Sklad 4. Summ 200
+Loader: push 37 to Sklad 5. Summ 200
+Loader: not loaded 637
+Client(9): pop 1 from Sklad 4(199)
+Client(9): pop 8 from Sklad 2(192)
+Client(2): pop 15 from Sklad 3(185)
+Client(4): pop 60 from Sklad 3(125)
+Client(10): pop 42 from Sklad 5(158)
+Client(2): pop 52 from Sklad 3(73)
+Client(6): pop 44 from Sklad 4(155)
+Client(5): pop 82 from Sklad 1(118)
+Loader: push 82 to Sklad 1. Summ 200
+Loader: push 8 to Sklad 2. Summ 200
+Loader: push 127 to Sklad 3. Summ 200
+Loader: push 45 to Sklad 4. Summ 200
+Loader: push 42 to Sklad 5. Summ 200
+Loader: not loaded 596
+Client(9): pop 1 from Sklad 4(199)
+Client(5): pop 42 from Sklad 1(158)
+Client(4): pop 29 from Sklad 3(171)
+Client(9): pop 22 from Sklad 3(149)
+Client(10): pop 47 from Sklad 4(152)
+Client(6): pop 40 from Sklad 2(160)
+Client(2): pop 57 from Sklad 3(92)
+Client(4): pop 71 from Sklad 1(87)
+Client(9): pop 25 from Sklad 4(127)
+Client(4): pop 14 from Sklad 3(78)
+Client(2): pop 22 from Sklad 2(138)
+Loader: push 113 to Sklad 1. Summ 200
+Loader: push 62 to Sklad 2. Summ 200
+Loader: push 122 to Sklad 3. Summ 200
+Loader: push 73 to Sklad 4. Summ 200
+Client(6): out
+Client(5): pop 25 from Sklad 5(175)
+Loader: push 25 to Sklad 5. Summ 200
+Loader: not loaded 505
+Client(10): pop 45 from Sklad 1(155)
+Client(5): pop 77 from Sklad 3(123)
+Client(5): out
+Client(4): out
+Client(9): pop 14 from Sklad 1(141)
+Client(2): pop 27 from Sklad 4(173)
+Client(10): pop 10 from Sklad 4(163)
+Loader: push 59 to Sklad 1. Summ 200
+Loader: push 77 to Sklad 3. Summ 200
+Loader: push 37 to Sklad 4. Summ 200
+Client(9): pop 57 from Sklad 1(143)
+Loader: push 57 to Sklad 1. Summ 200
+Client(2): pop 77 from Sklad 4(123)
+Loader: push 77 to Sklad 4. Summ 200
+Loader: not loaded 593
+Client(10): pop 31 from Sklad 1(169)
+Client(9): out
+Client(2): pop 6 from Sklad 4(194)
+Loader: push 31 to Sklad 1. Summ 200
+Loader: push 6 to Sklad 4. Summ 200
+Client(10): pop 2 from Sklad 2(198)
+Loader: push 2 to Sklad 2. Summ 200
+Client(2): pop 63 from Sklad 5(137)
+Client(2): pop 14 from Sklad 5(123)
+Loader: push 77 to Sklad 5. Summ 200
+Client(2): out
+Client(10): pop 34 from Sklad 1(166)
+Client(10): pop 83 from Sklad 5(117)
+Loader: push 83 to Sklad 5. Summ 200
+Loader: not loaded 701
+Client(10): out
