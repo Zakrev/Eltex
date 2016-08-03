@@ -1,0 +1,42 @@
+итого 52
+-rw-r--r-- 1 zakrevsky zakrevsky   19 Июл 27 08:52 comand
+-rw-r--r-- 1 zakrevsky zakrevsky   35 Июл 27 08:52 comand~
+-rwsr-Sr-T 1 zakrevsky zakrevsky    0 Июл 27 10:25 INP
+-rwsr-Sr-T 1 zakrevsky zakrevsky    0 Июл 27 10:20 INP~
+-rwxr-xr-x 1 zakrevsky zakrevsky 5802 Июл 27 10:26 main
+-rwxr-Sr-T 1 zakrevsky zakrevsky    0 Июл 27 10:27 OUT
+-rwxr-Sr-T 1 zakrevsky zakrevsky 4058 Июл 27 10:26 OUT~
+-rw-r--r-- 1 zakrevsky zakrevsky 1036 Июл 27 07:47 pipe.c
+-rwxr-xr-x 1 zakrevsky zakrevsky 5902 Июл 27 08:28 read_proc
+-rw-r--r-- 1 zakrevsky zakrevsky 1006 Июл 27 08:28 read_proc.c
+-rwxr-xr-x 1 zakrevsky zakrevsky 5755 Июл 27 08:33 write_proc
+-rw-r--r-- 1 zakrevsky zakrevsky  779 Июл 27 08:32 write_proc.c
+-rw-r--r-- 1 zakrevsky zakrevsky 1003 Июл 27 10:26 zad3.c
+
+  19 Июл 27 08:52 comand
+  35 Июл 27 08:52 comand~
+   0 Июл 27 10:25 INP
+   0 Июл 27 10:20 INP~
+5802 Июл 27 10:26 main
+   0 Июл 27 10:27 OUT
+4058 Июл 27 10:26 OUT~
+1036 Июл 27 07:47 pipe.c
+5902 Июл 27 08:28 read_proc
+1006 Июл 27 08:28 read_proc.c
+5755 Июл 27 08:33 write_proc
+ 779 Июл 27 08:32 write_proc.c
+1003 Июл 27 10:26 zad3.c
+итого 56
+-rw-r--r-- 1 zakrevsky zakrevsky   19 Июл 27 08:52 comand
+-rw-r--r-- 1 zakrevsky zakrevsky   35 Июл 27 08:52 comand~
+-rwsr-Sr-T 1 zakrevsky zakrevsky    0 Июл 27 10:25 INP
+-rwsr-Sr-T 1 zakrevsky zakrevsky    0 Июл 27 10:20 INP~
+-rwxr-xr-x 1 zakrevsky zakrevsky 5802 Июл 27 10:26 main
+-rwxr-Sr-T 1 zakrevsky zakrevsky 1186 Июл 27 10:27 OUT
+-rwxr-Sr-T 1 zakrevsky zakrevsky 4058 Июл 27 10:26 OUT~
+-rw-r--r-- 1 zakrevsky zakrevsky 1036 Июл 27 07:47 pipe.c
+-rwxr-xr-x 1 zakrevsky zakrevsky 5902 Июл 27 08:28 read_proc
+-rw-r--r-- 1 zakrevsky zakrevsky 1006 Июл 27 08:28 read_proc.c
+-rwxr-xr-x 1 zakrevsky zakrevsky 5755 Июл 27 08:33 write_proc
+-rw-r--r-- 1 zakrevsky zakrevsky  779 Июл 27 08:32 write_proc.c
+-rw-r--r-- 1 zakrevsky zakrevsky 1003 Июл 27 10:26 zad3.c

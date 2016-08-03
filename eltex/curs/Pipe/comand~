@@ -1,0 +1,2 @@
+ls =l | cut *.c
+ls -l | cut -c 34-
