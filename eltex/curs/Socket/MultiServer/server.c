@@ -11,6 +11,12 @@ int main()
         printf("Ceate PTH 0: ");
         if(CreatePTH(sinf) < 0)
                 goto eexit1;
+        /*
+                Делаем нулевой поток неубиваемым
+        */
+        pthread_mutex_lock(&sinf->mutexs[0]);
+        sinf->pinfs[0]->mfl = 2;
+        pthread_mutex_unlock(&sinf->mutexs[0]);
         printf("OK\n");
         printf("StartServices: ");
         if(StartServices(sinf) < 0)

@@ -8,7 +8,7 @@
         NRERTY - число попыток. Сколько портов можно перебрать для подключения.
 */
 #define START_PORT 1130
-#define MAX_RERTY 10
+#define MAX_RERTY 1000
 /*
         pth_d - дескриптор потока
         sock_d - дескриптор сокета
@@ -18,15 +18,17 @@
         addr[] - структуры адресов клиентов (т.е. клиент)
         cqueu - id структур новых клиентов
         mutex - указатель на mutexs[n] из SINF, где n - id потока
+        mfl - флаг на удаление потока
 */
 #define PTINF struct mPthreadInfo
-#define MAX_PTH_CLIENTS 5
+#define MAX_PTH_CLIENTS 50
 
 PTINF {
         pthread_t pth_d;
         int sock_d;
         int clients;
         int nclients;
+        int mfl;
         SADDR srv;
         SADDR **addr;
         int cqueu[MAX_PTH_CLIENTS];
@@ -47,8 +49,8 @@ PTINF {
         manager - (менеджер)поток для контролирования pinfs и вывода информации о клиентах
 */
 #define SINF struct mSystemInfo
-#define MAX_PTH 5
-#define MANAGE_TIMEOUT 5
+#define MAX_PTH 500
+#define MANAGE_TIMEOUT 1
 
 SINF {
         int sock_d;
@@ -68,7 +70,7 @@ PTINF *InitPTINF();
 void RemovePTINF(PTINF *pinf);
 int CreatePTH(SINF *sinf);
 void *WorkingPTH(void *arg);
-void ReadMSG(PTINF *pinf, MSG msg, SADDR from);
+void ReadMSG(PTINF *pinf, MSG msg);
 void CheckNewClients(PTINF *pinf);
 int AddClient(SINF *sinf, SADDR addr);
 void RemoveClient(PTINF *pinf, int id);

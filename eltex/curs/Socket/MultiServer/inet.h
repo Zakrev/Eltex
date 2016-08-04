@@ -25,9 +25,9 @@
 #define STR_SIZE 128
 
 #define SERVER_PORT 1126
-#define SERVER_IP "127.0.0.1"
+#define SERVER_IP "192.168.43.196"
 
 MSG {
-        time_t time;
+        int sid;
         char data_str[STR_SIZE];
 };
