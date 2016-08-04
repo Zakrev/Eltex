@@ -19,7 +19,7 @@
 #define MSG_SIZE sizeof(MSG)
 
 #define SERVER_PORT 1126
-#define SERVER_IP "192.168.2.22"
+#define SERVER_IP "192.168.2.34"
 
 MSG {
         char data[32];

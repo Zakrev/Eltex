@@ -20,7 +20,3 @@ int main()
         return 0;
 }
 
-void *SaysClient(void *arg)
-{
-        
-}
