@@ -84,6 +84,7 @@ void RemoveSINF(SINF *sinf)
                 for(i = 0; i < MAX_PTH; i++){
                         if(pthread_mutex_lock(&sinf->mutexs[i]) == 0){
                                 RemovePTINF(sinf->pinfs[i]);
+                                sinf->pinfs[i] = NULL;
                                 pthread_mutex_unlock(&sinf->mutexs[i]);
                         }
                 }
@@ -149,12 +150,13 @@ PTINF *InitPTINF()
                 pinf->cqueu[i] = -1;
         }
         CopySADDR(srv, &pinf->srv);
-        pinf->mfl = 0;
+        pinf->mfl = MFL_JOB;
+        pinf->mfl_type = MFL_JOB;
         pinf->addr = addr;
         pinf->sock_d = sock_d;
         pinf->clients = 0;
         pinf->nclients = 0;
-
+        
         return pinf;
 }
 
@@ -169,16 +171,19 @@ void RemovePTINF(PTINF *pinf)
                 return;
         
         int i;
+        pthread_t pth_d = pinf->pth_d;
         
-        pthread_cancel(pinf->pth_d);
+        if(pthread_cancel(pth_d) < 0)
+                perror("Error on remove pthread"); 
         close(pinf->sock_d);
         for(i = 0; i < MAX_PTH_CLIENTS; i++){
                 if(pinf->addr[i] == NULL)
                         continue;
                 free(pinf->addr[i]);
+                pinf->addr[i] = NULL;
         }
         free(pinf->addr);
-        free(pinf);
+        free(pinf);        
 }
 /*
         Создаем новый пустой поток для обработки клиентов
@@ -200,7 +205,8 @@ int CreatePTH(SINF *sinf)
                                 if(sinf->pinfs[id] != NULL){
                                         if(pthread_create(&sinf->pinfs[id]->pth_d, NULL, WorkingPTH, sinf->pinfs[id]) < 0){
                                                 perror("Error create pthread");
-                                                RemovePTINF(sinf->pinfs[id]);      
+                                                RemovePTINF(sinf->pinfs[id]);
+                                                sinf->pinfs[id] = NULL;     
                                         } else {
                                                 rez = 0;
                                                 sinf->pinfs[id]->mutex = &sinf->mutexs[id];
@@ -222,19 +228,46 @@ void *WorkingPTH(void *arg)
         PTINF *pinf;
         MSG msg;
         int sock_d;
+        struct pollfd pfd[1];
+        int poll_rez;
         
         pinf = (PTINF *) arg;
         sock_d = pinf->sock_d;
+        pfd[0].fd = sock_d;
+        pfd[0].events = POLLIN;
+        pfd[0].revents = 0;
         
         while(1){
-                if( recvfrom(sock_d, &msg, MSG_SIZE, MSG_DONTWAIT, NULL, NULL) < 0){
-                        //perror("WorkingPTH (error recv)");
-                } else {
-                        if(pthread_mutex_lock(pinf->mutex) == 0){
-                                ReadMSG(pinf, msg);
-                                pthread_mutex_unlock(pinf->mutex);
-                        }
+                if( pthread_mutex_lock(pinf->mutex) < 0){
+                        sleep(NCLIENTS_TIMEOUT);
+                        
+                        continue;
                 }
+                if(pinf->clients < 1){
+                        CheckNewClients(pinf);
+                        pthread_mutex_unlock(pinf->mutex);
+                        sleep(NCLIENTS_TIMEOUT);
+                        
+                        continue;
+                }
+                pinf->mfl = pinf->mfl_type;
+                pthread_mutex_unlock(pinf->mutex);
+                
+                poll_rez = poll(pfd, 1, NCLIENTS_TIMEOUT * 1000);
+                if(poll_rez > 0){
+                        if( recvfrom(sock_d, &msg, MSG_SIZE, MSG_DONTWAIT, NULL, NULL) < 0){
+                                //perror("WorkingPTH (error recv)");
+                        } else {
+                                if(pthread_mutex_lock(pinf->mutex) == 0){
+                                        ReadMSG(pinf, msg);
+                                        pthread_mutex_unlock(pinf->mutex);
+                                }
+                        }
+                } else {
+                        if(poll_rez < 0)
+                                perror("Error in poll");
+                }
+                
                 if(pthread_mutex_trylock(pinf->mutex) == 0){
                         CheckNewClients(pinf);
                         pthread_mutex_unlock(pinf->mutex);
@@ -257,7 +290,7 @@ void ReadMSG(PTINF *pinf, MSG msg)
         socklen_t sl;
         SADDR addr;
         int sid = msg.sid;
-        //time_t now_time;
+        time_t now_time;
 
         if(sid < 0 || sid >= MAX_PTH_CLIENTS){
                 printf("Unkown client: %d\n", sid);
@@ -265,9 +298,9 @@ void ReadMSG(PTINF *pinf, MSG msg)
         }
         sl = SADDR_SIZE;
         CopySADDR(*pinf->addr[sid], &addr);
-        /*time(&now_time);
-        printf("%s\t%s(%d): %s\n", ctime(&now_time), inet_ntoa(addr.sin_addr), htons(addr.sin_port), msg.data_str);
-        */
+        time(&now_time);
+        //printf("%s\t%s(%d): %s\n", ctime(&now_time), inet_ntoa(addr.sin_addr), htons(addr.sin_port), msg.data_str);
+        
         if(sendto(pinf->sock_d, &msg, MSG_SIZE, 0, (struct sockaddr *) &addr, sl) < 0)
                 perror("Error re-send");
         RemoveClient(pinf, sid);
@@ -286,10 +319,10 @@ void CheckNewClients(PTINF *pinf)
         time_t sec;
         struct tm *timeinfo;
                 
-        sl = SADDR_SIZE;       
-        for(i = 0; i < MAX_PTH_CLIENTS; i++){
+        sl = SADDR_SIZE; 
+        for(i = 0; pinf->nclients > 0 && i < MAX_PTH_CLIENTS; i++){
                 if(pinf->cqueu[i] == -1)
-                        break;
+                        continue;
                 /*
                         Если id в списке есть, а структуры нет,
                         то просто убераем id из списка
@@ -298,14 +331,22 @@ void CheckNewClients(PTINF *pinf)
                         /*
                                 Отправляем текущую дату клиенту.
                         */
+                        
                         sec = time(NULL);
                         timeinfo = localtime(&sec);
                         sprintf(msg.data_str, "%s", asctime(timeinfo));
-                        msg.sid = pinf->cqueu[i];
-                                     
+                        msg.sid = pinf->cqueu[i];         
                         if(sendto(pinf->sock_d, &msg, MSG_SIZE, MSG_DONTWAIT, (struct sockaddr *) pinf->addr[pinf->cqueu[i]], sl) < 0){
                                 //perror("Error send (CheckNewClients)");
-                        }                       
+                        }
+                        printf("%s\tNew client: %s (%d)\n", 
+                                asctime(timeinfo), 
+                                inet_ntoa(pinf->addr[pinf->cqueu[i]]->sin_addr),
+                                ntohs(pinf->addr[pinf->cqueu[i]]->sin_port));
+                        /*
+                                Сразу удаляем клиента
+                        */
+                        RemoveClient(pinf, pinf->cqueu[i]);                       
                 }
                 pinf->cqueu[i] = -1;
                 pinf->nclients--;
@@ -426,27 +467,16 @@ void *ManagerWorking(void *arg)
                                                 else
                                                         mfl = ' ';
                                                 switch(pinf->mfl){
-                                                        case 0:
-                                                                /*
-                                                                        Если поток не используется помечаем на удаление
-                                                                */
-                                                                if(pinf->clients == 0 && pinf->nclients == 0){
-                                                                        sinf->pinfs[i]->mfl = 1;
-                                                                        mfl = '*';
-                                                                }
+                                                        case MFL_JOB:
+                                                                        sinf->pinfs[i]->mfl = MFL_WAIT;
                                                         break;
-                                                        case 1:
-                                                                /*
-                                                                        Поток помечен на удаление.
-                                                                        Если поток не используется, удаляем.
-                                                                        Если поток работает, обнуляем метку на удаление.
-                                                                */
-                                                                if(pinf->clients == 0 && pinf->nclients == 0){
+                                                        case MFL_WAIT:
+                                                                        sinf->pinfs[i]->mfl = MFL_KILL;
+                                                                        mfl = '*';
+                                                        break;
+                                                        case MFL_KILL:
                                                                         RemovePTINF(pinf);
                                                                         sinf->pinfs[i] = NULL;
-                                                                } else {
-                                                                        pinf->mfl = 0;                                                        
-                                                                }
                                                         break;
                                                 }
                                         }

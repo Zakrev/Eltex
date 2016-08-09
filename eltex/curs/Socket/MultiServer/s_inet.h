@@ -1,4 +1,5 @@
 #include "inet.h"
+#include <sys/poll.h>
 #include <pthread.h>
 
 #define SADDR struct sockaddr_in
@@ -23,9 +24,15 @@
         mfl - флаг на удаление потока
         
         MAX_PTH_CLIENTS - максимум клиентов для одного потока
+        NCLIENTS_TIMEOUT - периодичность проверки массива с новыми клиентами, в секундах
 */
 #define PTINF struct mPthreadInfo
-#define MAX_PTH_CLIENTS 50
+#define MAX_PTH_CLIENTS 10
+#define NCLIENTS_TIMEOUT 1
+#define MFL_WAIT 1
+#define MFL_JOB 0
+#define MFL_UNKILL 3
+#define MFL_KILL 2
 
 PTINF {
         pthread_t pth_d;
@@ -33,6 +40,7 @@ PTINF {
         int clients;
         int nclients;
         int mfl;
+        int mfl_type;
         SADDR srv;
         SADDR **addr;
         int cqueu[MAX_PTH_CLIENTS];
@@ -51,11 +59,11 @@ PTINF {
         manager - Менеджер работающих потоков. Поток для контролирования pinfs[] и вывода информации
         
         MAX_PTH - максимум потоков
-        MANAGE_TIMEOUT - таймаут вывода информации и проверки потоков
+        MANAGE_TIMEOUT - таймаут вывода информации и проверки потоков, в секундах
 */
 #define SINF struct mSystemInfo
 #define MAX_PTH 500
-#define MANAGE_TIMEOUT 1
+#define MANAGE_TIMEOUT 20
 
 SINF {
         int sock_d;

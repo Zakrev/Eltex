@@ -28,6 +28,9 @@ int main()
 	fork();
 	fork();
 	fork();
+	fork();
+	fork();
+	fork();
 
         sock_d = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
         if(sock_d <= 0){

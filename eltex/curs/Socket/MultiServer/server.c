@@ -15,7 +15,8 @@ int main()
                 Делаем нулевой поток неубиваемым
         */
         pthread_mutex_lock(&sinf->mutexs[0]);
-        sinf->pinfs[0]->mfl = 2;
+        sinf->pinfs[0]->mfl_type = MFL_UNKILL;
+        sinf->pinfs[0]->mfl = MFL_UNKILL;
         pthread_mutex_unlock(&sinf->mutexs[0]);
         printf("OK\n");
         printf("StartServices: ");
