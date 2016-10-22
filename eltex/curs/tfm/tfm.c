@@ -9,12 +9,13 @@ int main()
         int key;
         int twin_left_width;
         
+        signal(SIGINT, SIG_IGN);
         initscr();
         keypad(stdscr, 1);
         noecho();
         refresh();
         key_info = derwin(stdscr, 0, 0, 0, 0);
-        wprintw(key_info, " F10 - Exit    F5 - Copy selected file");
+        wprintw(key_info, " F10 - Exit    F5 - Copy selected file    Tab - swich window");
         wrefresh(key_info);
         twin_left_width = InitWindowTree(&twin_left, 0, 1);
         CreateDInfoList(&twin_left);
@@ -47,6 +48,10 @@ int main()
         return 0;
 }
 
+/*
+        Переключает активное окно TREE_WIN.
+        Возвращает указатель новое активное окно.
+*/
 TREE_WIN *SwitchWin(TREE_WIN *now, TREE_WIN *left, TREE_WIN *right)
 {
         if(now == left)
@@ -55,6 +60,9 @@ TREE_WIN *SwitchWin(TREE_WIN *now, TREE_WIN *left, TREE_WIN *right)
                 return left;
 }
 
+/*
+        Получение размера терминального окна
+*/
 void GetWinSize(int *row, int *col)
 {
         struct winsize size;
@@ -63,6 +71,9 @@ void GetWinSize(int *row, int *col)
         *row = size.ws_row;
 }
 
+/*
+        Функция проверяет строку str. Если строка состоит только из символа "." или пустая, то возвращает ошибку
+*/
 int CheckDname(char *str)
 {
         if(str[0] != '.')
@@ -75,6 +86,11 @@ int CheckDname(char *str)
         return 0;
 }
 
+/*
+        Функция создает новое окно TREE_WIN и отрисовывает его на экране 
+        с верхним левым углом в позиции (x,y).
+        Возвращат ширину нового окна.
+*/
 int InitWindowTree(TREE_WIN *win, int x_col, int y_row)
 {
         int w_col, w_row;
@@ -133,6 +149,9 @@ int InitWindowTree(TREE_WIN *win, int x_col, int y_row)
         return b_col;
 }
 
+/*
+        Удаляет дерево файлов из структуры TREE_WIN
+*/
 void ClearDInfoList(TREE_WIN *twin)
 {
         int i;
@@ -148,6 +167,9 @@ void ClearDInfoList(TREE_WIN *twin)
         twin->name_index = 1;
 }
 
+/*
+        Создает дерево файлов текущего каталога в структуре TREE_WIN
+*/
 int CreateDInfoList(TREE_WIN *twin)
 {
         struct dirent **name_list;
@@ -163,6 +185,10 @@ int CreateDInfoList(TREE_WIN *twin)
         return 0;
 }
 
+/*
+        Функция возвращает строку (в переменную name) для колонки Name в окне TREE_WIN
+        В строке записываются разрешения и имя файла
+*/
 void MakeName(char *str, struct stat *sb, char *name)
 {
         char r = ' ';
@@ -192,6 +218,10 @@ void MakeName(char *str, struct stat *sb, char *name)
         sprintf(str, "%c%c%c %s", r, w, x, name);
 }
 
+/*
+        Функция очищает окно TREE_WIN, печатает на экран часть дерева файлов относительно позиции курсора (start_index)
+        в списке файлов текущего каталога (twin->name_list_d)
+*/
 void PrintDInfoList(TREE_WIN *twin, int start_index)
 {
         int i, j;
@@ -224,6 +254,11 @@ void PrintDInfoList(TREE_WIN *twin, int start_index)
         MoveCursorToRowCol(twin, twin->cursor.row, twin->cursor.col);
 }
 
+/*
+        Функия передвигает курсор на экране в позицию (row, col)
+        И записывает изминения позиции в структуре TREE_WIN
+        Если экранный курсор сдвинуть не получилось, возвращает ошибку
+*/
 int MoveCursorToRowCol(TREE_WIN *twin, int row, int col)
 {
         if( wmove(twin->name_list, col, row) > -1 ){
@@ -236,6 +271,11 @@ int MoveCursorToRowCol(TREE_WIN *twin, int row, int col)
         return -1;
 }
 
+/*
+        Функция делает активной следующую (вниз) строку дерева файлов в окне TREE_WIN
+        Возвращает результат выполнения функции MoveCursorToRowCol (результат перемещения курсора),
+        либо ошибку, если список файлов закончился
+*/
 int NextLine(TREE_WIN *twin)
 {
         int cursor_pos = twin->nl_rows - twin->cursor.col;
@@ -249,6 +289,10 @@ int NextLine(TREE_WIN *twin)
         return MoveCursorToRowCol(twin, twin->cursor.row, twin->cursor.col + 1);
 }
 
+/*
+        Функция делает активной следующую (вверх) строку дерева файлов в окне TREE_WIN
+        Возвращает результат перемещения курсора, либо ошибку, если список файлов закончился
+*/
 int PrevLine(TREE_WIN *twin)
 {
         if( (twin->name_index - 1) > 0){
@@ -261,6 +305,11 @@ int PrevLine(TREE_WIN *twin)
         return MoveCursorToRowCol(twin, twin->cursor.row, twin->cursor.col - 1);
 }
 
+/*
+        Функция меняет текущий каталог окна TREE_WIN
+        Создает и печатает новое дерево файлов
+        Возвращает ошибку, если каталог сменить невозможно
+*/
 int ChDir(TREE_WIN *twin, char *dname)
 {
         if(chdir(dname) < 0)
@@ -273,6 +322,11 @@ int ChDir(TREE_WIN *twin, char *dname)
         return 0;
 }
 
+/*
+        Функция меняет текущий каталог окна TREE_WIN
+        Не создает и не печатает новое дерево файлов, используется при переключении окон TREE_WIN
+        Возвращает ошибку, если каталог сменить невозможно
+*/
 int ChDir_NotMove(TREE_WIN *twin, char *dname)
 {
         if(chdir(dname) < 0)
@@ -282,6 +336,14 @@ int ChDir_NotMove(TREE_WIN *twin, char *dname)
         return 0;
 }
 
+/*
+        Функция обрабатывает нажатие Enter
+        Выполняет следующие действия, в зависимости от типа выбранного файла:
+                - смена каталога
+                - редактирование файла (если у файла нет прав на запуск)
+                - запуск файла
+        После запуска на исполнение/редактирования файла вновь инициализирует ncurses и обновляет активное окно
+*/
 int OnPressEnter(TREE_WIN *twin)
 {
         struct dirent **name_list = twin->name_list_d;
@@ -294,14 +356,23 @@ int OnPressEnter(TREE_WIN *twin)
         if(stat(name_list[name_index]->d_name, &stat_buff) > -1){
                 switch(stat_buff.st_mode & S_IFMT){
                         case S_IFDIR:
+                                /*
+                                        Смена каталога
+                                */
                                 return ChDir(twin, name_list[name_index]->d_name);
                         break;
                         default:
-                                if(stat_buff.st_mode & S_IXUSR || stat_buff.st_mode & S_IXGRP || stat_buff.st_mode & S_IXOTH){
+                                if( FileIsExe(&stat_buff) == 0 && IsFileExtension(name_list[name_index]->d_name) != 0 ){
+                                        /*
+                                                Исполнение файла
+                                        */
                                         StartFile(name_list[name_index]->d_name);
                                         initscr();
                                         PrintDInfoList(twin, 1);
                                 } else {
+                                        /*
+                                                Редактирование файла
+                                        */
                                        EditFile(name_list[name_index]->d_name);
                                        initscr();
                                        PrintDInfoList(twin, 1);
@@ -315,38 +386,61 @@ int OnPressEnter(TREE_WIN *twin)
         return 0;
 }
 
+/*
+        Функция отключает ncurses и порождает новый процесс, в котором запускается файл.
+        filename - путь и имя исполняемого файла
+*/
 int StartFile(char *fname)
 {
         pid_t pid;
         
+        endwin();
         pid = fork();
-        
         if(pid == 0){
+                signal(SIGINT, SIG_DFL);
                 execl(fname, fname, (char*)NULL);
+                /*
+                        Процесс останавливается в случае ошибки
+                */
+                perror("Error on start process");
+                exit(1);
         } else {
-                endwin();
                 wait(0);
         }
         
         return 0;
 }
 
+/*
+        Функция отключает ncurses и порождает новый процесс, в котором запускается редактор файла.
+        filename - путь и имя редактируемого файла
+*/
 int EditFile(char *fname)
 {
         pid_t pid;
         
-        pid = fork();
-        
+        endwin();
+        pid = fork();        
         if(pid == 0){
+                signal(SIGINT, SIG_DFL);
                 execlp("mc", "mc", "-e", fname, (char*)NULL);
-        } else {
-                endwin();
+                /*
+                        Процесс останавливается в случае ошибки
+                */
+                perror("Error on open file");
+                exit(1);
+        } else {          
                 wait(0);
         }
         
         return 0;
 }
 
+/*
+        Функция создает структуру PBAR_WIN с левым верхним углом в позиции (x, y) и текстом text.
+        Заполняет ее и отрисовывает прогрессбар на экране
+        Возвращает указатель на новую структуру PBAR_WIN
+*/
 PBAR_WIN *CreatePBAR(TREE_WIN *twin, int x, int y, char *text)
 {
         PBAR_WIN *pbar;
@@ -378,6 +472,9 @@ PBAR_WIN *CreatePBAR(TREE_WIN *twin, int x, int y, char *text)
         return pbar;
 }
 
+/*
+        Функция удаляет прогрессбар с экрана и удаляет структуру PBAR_WIN.
+*/
 void DeletePBAR(PBAR_WIN *pbar)
 {
         wclear(pbar->box);
@@ -388,6 +485,9 @@ void DeletePBAR(PBAR_WIN *pbar)
         free(pbar);
 }
 
+/*
+        Функция перерисовывает линию прогресса в соответствии с значением val (от 0 до 100)
+*/
 void SetProgressPercent(TREE_WIN *twin, PBAR_WIN *pbar, int val)
 {
         int step = (val * pbar->progress_size) / 100;
@@ -400,6 +500,14 @@ void SetProgressPercent(TREE_WIN *twin, PBAR_WIN *pbar, int val)
         MoveCursorToRowCol(twin, twin->cursor.row, twin->cursor.col);
 }
 
+/*
+        Функция (поток) пытается открыть файл mCopyInfo.from. Если успешно, то пытается
+        создать файл mCopyInfo.to с флагами идентичными флагам mCopyInfo.from.
+        Добавляет на экран прогрессбар.
+        Копирует данные из файла mCopyInfo.from в файл mCopyInfo.to со скоростью 64 бит/с.
+        Также изменяет состояния полосы прогресса в прогрессбаре.
+        После копирования закрывает все файлы и убирает с экрана прогрессбар.
+*/
 void *CopyFile(void *arg)
 {
         struct mCopyInfo *mci = (struct mCopyInfo *)arg;
@@ -456,6 +564,13 @@ int CopyFlags(char *fname)
         return S_IRWXU;
 }
 
+/*
+        Функция инициализирует копирование файла.
+        Создает структуру mCopyInfo и заполняет ее информацией о копируемом и новом файлах.
+        Если копируемый файл не может быть определен, возвращается ошибка
+        Если копируемый файл является директорией, возвращается ошибка
+        Создает новый поток CopyFile, которому передает структуру mCopyInfo
+*/
 int InitCopyFile(TREE_WIN **from_win, TREE_WIN *to_win)
 {
         pthread_t pth;
@@ -469,11 +584,17 @@ int InitCopyFile(TREE_WIN **from_win, TREE_WIN *to_win)
         mci->twin = from_win;
         sprintf(mci->from, "%s/%s", (*from_win)->cur_dir, name_list->d_name);
         sprintf(mci->to, "%s/%s", to_win->cur_dir, name_list->d_name);
-        if(stat(mci->from, &from_stat) < -1){//Непонятный файл
+        if(stat(mci->from, &from_stat) < -1){
+                /*
+                        Неопределенный файл
+                */
                 free(mci);
                 return -1;
         }
-        if( (from_stat.st_mode & S_IFMT) == S_IFDIR ){//Директория
+        if( (from_stat.st_mode & S_IFMT) == S_IFDIR ){
+                /*
+                        Дирректория
+                */
                 free(mci);
                 return -1;
         }
@@ -483,6 +604,9 @@ int InitCopyFile(TREE_WIN **from_win, TREE_WIN *to_win)
         return 0;
 }
 
+/*
+        Функция проверяет является-ли файл читаемым
+*/
 int FileIsRead(struct stat *sf)
 {
         if( sf->st_mode & S_IRUSR || sf->st_mode & S_IRGRP || sf->st_mode & S_IROTH )
@@ -491,6 +615,9 @@ int FileIsRead(struct stat *sf)
         return -1;
 }
 
+/*
+        Функция проверяет является-ли файл изменяемым
+*/
 int FileIsWrite(struct stat *sf)
 {
         if( sf->st_mode & S_IWUSR || sf->st_mode & S_IWGRP || sf->st_mode & S_IWOTH )
@@ -499,10 +626,29 @@ int FileIsWrite(struct stat *sf)
         return -1;
 }
 
+/*
+        Функция проверяет является-ли файл исполняемым
+*/
 int FileIsExe(struct stat *sf)
 {
         if( sf->st_mode & S_IXUSR || sf->st_mode & S_IXGRP || sf->st_mode & S_IXOTH )
                 return 0;
+        
+        return -1;
+}
+
+/*
+        Функция проверяет наличия расширения у файла file_name
+        Возвращает ошибку, если расширения нет
+*/
+int IsFileExtension(char *file_name)
+{
+        int i;
+        
+        for(i = 0; file_name[i] != '\0'; i++){
+                if(file_name[i] == '.')
+                        return 0;
+        }
         
         return -1;
 }

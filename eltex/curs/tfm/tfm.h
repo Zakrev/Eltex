@@ -11,6 +11,7 @@
 #include <sys/wait.h>
 #include <pthread.h>
 #include <fcntl.h>
+#include <signal.h>
 
 #define TREE_WIN struct WindowTree
 #define MCURS struct mCursor
@@ -21,12 +22,17 @@
         row - y - height
         col - x - width
 */
-
+/*
+        MCURS - структура, хранит информацию о положении указателя
+*/
 MCURS {
         off_t row;
         off_t col;
 };
-
+/*
+        TREE_WIN - структура, хранит информацию об окне в котором отображается
+                дерево файлов
+*/
 TREE_WIN {
         WINDOW *bord;
         WINDOW *name_list;
@@ -41,7 +47,10 @@ TREE_WIN {
         char cur_dir[CURDIR_SIZE];
         struct dirent **name_list_d;
 };
-
+/*
+        PBAR_WIN - структура, зранит информацию об окне в котором отображается
+                прогресс (копирования)
+*/
 PBAR_WIN {
         WINDOW *box;
         WINDOW *text;
@@ -78,3 +87,4 @@ int InitCopyFile(TREE_WIN **, TREE_WIN *);
 int FileIsRead(struct stat *);
 int FileIsWrite(struct stat *);
 int FileIsExe(struct stat *);
+int IsFileExtension(char *file_name);
