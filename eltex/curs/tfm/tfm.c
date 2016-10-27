@@ -6,6 +6,7 @@ int main()
         TREE_WIN twin_left;
         TREE_WIN twin_right;
         TREE_WIN *now_win;
+        CLINE cline;
         int key;
         int twin_left_width;
         
@@ -15,12 +16,13 @@ int main()
         noecho();
         refresh();
         key_info = derwin(stdscr, 0, 0, 0, 0);
-        wprintw(key_info, " F10 - Exit    F5 - Copy selected file    Tab - swich window");
+        wprintw(key_info, " F10 - Exit    F4 - Comand line    F5 - Copy selected file    Tab - swich window");
         wrefresh(key_info);
-        twin_left_width = InitWindowTree(&twin_left, 0, 1);
+        InitComandLine(&cline, 1, 1);
+        twin_left_width = InitWindowTree(&twin_left, 0, 5);
         CreateDInfoList(&twin_left);
         PrintDInfoList(&twin_left, 1);
-        InitWindowTree(&twin_right, twin_left_width, 1);
+        InitWindowTree(&twin_right, twin_left_width, 5);
         CreateDInfoList(&twin_right);
         PrintDInfoList(&twin_right, 1);
         now_win = &twin_left;
@@ -28,9 +30,14 @@ int main()
         
         while( (key = getch()) > 0 ){
                 if(key == KEY_F(10))
-                        break;
+                        OnExit();
                 if(key == KEY_F(5)){
                         InitCopyFile(&now_win, now_win == &twin_left ? &twin_right : &twin_left);
+                }
+                if(key == KEY_F(4)){
+                        MoveCursorToRowCol_CLINE(&cline, cline.cursor.row, cline.cursor.col);
+                        RunComandLine(&cline);
+                        MoveCursorToRowCol(now_win, now_win->cursor.row, now_win->cursor.col);
                 }
                 if(key == KEY_DOWN)
                         NextLine(now_win);
@@ -46,6 +53,15 @@ int main()
         }
         endwin();
         return 0;
+}
+
+/*
+        Функция завершает программу
+*/
+void OnExit()
+{
+        endwin();
+        exit(0);
 }
 
 /*
@@ -651,4 +667,327 @@ int IsFileExtension(char *file_name)
         }
         
         return -1;
+}
+
+/*
+        Функция создает новое окно CLINE и отрисовывает его на экране 
+        с верхним левым углом в позиции (x,y).
+*/
+int InitComandLine(CLINE *cline, int x_col, int y_row)
+{
+        int b_col, b_row;
+        
+        GetWinSize(&b_row, &b_col);
+        b_row = 3;
+        b_col -= 4;
+        
+        cline->box = newwin(b_row, b_col, y_row, x_col);
+        box(cline->box, '|', '-');
+        wrefresh(cline->box);
+        
+        cline->text = derwin(cline->box, 1, b_col-4, 1, 2);
+        wrefresh(cline->text);
+        
+        cline->cursor.row = 0;
+        cline->cursor.col = 0;
+        cline->buf_pos = 0;
+        cline->buff[0] = '\0';
+
+        return 0;
+}
+
+/*
+        Функция обрабатывает клавиши в режиме командной строки
+*/
+int RunComandLine(CLINE *cline)
+{
+        int key;
+        
+        while( (key = getch()) > 0 ){
+                switch(key){
+                        case KEY_F(10):
+                                /*
+                                        Нажатие F10, выход из программы
+                                */
+                                OnExit();
+                        break;
+                        case KEY_F(4):
+                                /*
+                                        Нажатие F4, выход из режима командной строки
+                                */
+                                return 0;
+                        break;
+                        case 263:
+                                /*
+                                        Нажатие Backspace, удаление последнего символа из буфера
+                                */
+                                EraseFromClineBuffer(cline);
+                        break;
+                        case 10:
+                                /*
+                                        Нажатие Enter, выполнение введенных команд
+                                */
+                                if(OnPressEnter_CLINE(cline) == 0){
+                                        initscr();
+                                        cline->buff[0] = '\0';
+                                        cline->buf_pos = 0;
+                                        MoveCursorToRowCol_CLINE(cline, cline->cursor.row, 0);
+                                        wclear(cline->text);
+                                        wrefresh(cline->text);
+                                        
+                                        return 0;
+                                }
+                                initscr();
+                                wrefresh(cline->text);
+                        break;
+                        default:
+                                /*
+                                        Нажатие любой другой клавиши, запись символа в буфер
+                                */
+                                AddToClineBuffer(cline, (char)key);
+                        break;
+                }
+        }
+        
+        return 0;
+}
+
+/*
+        Функия передвигает курсор на экране в позицию (row, col) в пределах CLINE
+        Если экранный курсор сдвинуть не получилось, возвращает ошибку
+*/
+int MoveCursorToRowCol_CLINE(CLINE *cline, int row, int col)
+{
+        if( wmove(cline->text, row, col) > -1 ){
+                cline->cursor.row = row;
+                cline->cursor.col = col;
+                wrefresh(cline->text);
+                return 0;
+        }
+        
+        return -1;
+}
+
+/*
+        Функция заносит новый символ в буфер CLINE->buff
+        Проверяет символ, после чего заносит символ в буфер в позицию CLINE->buf_pos
+        Увеличивает значение позиции курсора по x и позиции указателя CLINE->buf_pos
+        Печатает новый символ на экране
+        
+*/
+int AddToClineBuffer(CLINE *cline, char c)
+{       
+        if(!( (c >= 'A' && c <= 'Z') || 
+        (c >= 'a' && c <= 'z') || 
+        (c >= '0' && c <= '9') || 
+        c == '/' || c == ' ' || c == '_' || c == '-' || c == '|' || c == '.' || c == '\'' || c == '"'))
+                return -1;
+        
+        if(cline->buf_pos + 2 >= CLINE_LENGHT)
+                return -1;
+        
+        cline->buff[cline->buf_pos] = c;
+        cline->buff[cline->buf_pos + 1] = '\0';
+        cline->buf_pos += 1;
+        cline->cursor.col += 1;
+        
+        wprintw(cline->text, cline->buff + cline->buf_pos - 1);
+        wrefresh(cline->text);
+        
+        return 0;
+}
+
+/*
+        Функция удаляет последний символ из буфера CLINE->buff
+        Уменьшает значение позиции курсора по x и позиции указателя CLINE->buf_pos
+        Удаляет последний символ с экрана
+*/
+int EraseFromClineBuffer(CLINE *cline)
+{              
+        if(cline->buf_pos - 1 < 0)
+                return -1;
+        
+        if( wmove(cline->text, cline->cursor.row, cline->cursor.col - 1) > -1 ){
+                cline->buff[cline->buf_pos - 1] = '\0';
+                cline->buf_pos -= 1;
+                cline->cursor.col -= 1;
+                
+                wdelch(cline->text);
+                wrefresh(cline->text);
+        }
+        
+        return 0;
+}
+
+/*
+        Обрабатывает нажатие Enter в окне CLINE
+        Создает процесс, который разбирает и выполняет команды из буфера
+        Возвращает результат работы потомка
+*/
+int OnPressEnter_CLINE(CLINE *cline)
+{        
+        pid_t pid;
+        int rez;
+        
+        endwin();
+        pid = fork();
+        
+        if(pid == 0){
+                ExecuteLine(cline->buff);
+        } else {
+                waitpid(pid, &rez, 0);
+                if(rez != 0)
+                        return -1;               
+        }
+        
+        return 0;
+}
+
+/*
+        Функция разбирает входную строку str с позиции pos на команды и параметры,
+        которые записывает в массив строк arg
+        Возвращает позицию символа следующей команды после '|', в строке str.
+*/
+int GetArgements(char *arg[ARG_LENGHT], char tmp_arg[ARG_LENGHT][ARG_U_SIZE], char *str, int pos)
+{
+        int i = 0, j;
+
+        for( i = 0; str[pos] != '|' && str[pos] != '\0' && i < ARG_LENGHT; pos++){                
+                for(j = 0; j < ARG_U_SIZE && str[pos] != ' ' && str[pos] != '|' && str[pos] != '\0'; j++, pos++){
+                        tmp_arg[i][j] = str[pos];
+                }
+                tmp_arg[i][j] = '\0';
+                arg[i] = tmp_arg[i];
+                i++;
+                if(str[pos] == '\0')
+                        break;
+        }
+        arg[i] = (char*)NULL;
+        
+        return pos+2;
+}
+
+/*
+        Функция получает на вход строку str с командами.
+        Разбирает ее и поочередно запускает полученные команды.
+        
+        Подсчитывает количество команд в строке.
+        Создает канал 1 для вывода в него данных первой команды.
+        Получает первую команду и ее аргументы, затем создает процесс-потомок.
+        Назначает потомку канал 1 вместо стандартного stdout, и заменяет потомка новой командой.
+        Закрывает канал 1 на запись и ждет завершения потомка.
+        Если команд было больше одной, то входит в цикл, либо читает канал 1, выводит полученную информацию и завершается.
+        
+        В цикле создает канал 2, получает следующую команду и ее аргументы, создает процесс-потомок.
+        Заменяет потомку stdout на канал 2, а stdin на канал 1, после чего заменяет процесс исполняемой командой.
+        Ждет завершений потомка, полностью закрывает канал 1, также закрывает канал 2 на ввод.
+        Если команд на исполнение больше не осталось, читает канал 2 и выводит полученную информацию. Завершается.
+        Иначе, создает канал 1, получает следующую команду и ее аргументы, создает процесс-потомок.
+        Заменяет потомку stdout на канал 1, а stdin на канал 2, после чего заменяет процесс исполняемой командой.
+        Ждет завершений потомка, полностью закрывает канал 2, также закрывает канал 1 на ввод.
+        Если команд на исполнение больше не осталось, читает канал 1 и выводит полученную информацию. Завершается.
+        Иначе, повторяет цикл.
+        
+        Возвращает результат запуска последней команды
+*/
+int ExecuteLine(char *str)
+{
+        char out[CLINE_LENGHT] = "";
+        
+        char *arg[ARG_LENGHT];
+        char tmp_arg[ARG_LENGHT][ARG_U_SIZE];
+        int pipefd_left[2], pipefd_right[2];
+        int i, count, pos, rez = 0;
+        pid_t pid;
+        
+        /*
+                Подсчет команд
+        */
+        for(i = 0, count = 0; str[i] != '\0'; i++){
+                if(str[i] == '|')
+                        count++;
+        }
+        count += 1;
+        
+        if(pipe(pipefd_left) < 0){
+                perror("Error on create pipe");
+                exit(1);
+        }
+        pos = GetArgements(arg, tmp_arg, str, 0);
+        count--;
+        pid = fork();
+        if(pid == 0){
+                close(pipefd_left[0]);
+                dup2(pipefd_left[1], 1);
+                execvp(arg[0], arg);
+                perror(arg[0]);
+                exit(1);
+        } else {
+                close(pipefd_left[1]);
+                waitpid(pid, &rez, 0);
+                while(count > 0){                        
+                        if(count <= 0)
+                                break;                        
+                        if(pipe(pipefd_right) < 0){
+                                perror("Error on create pipe");
+                                exit(1);
+                        }
+                        pos = GetArgements(arg, tmp_arg, str, pos);
+                        count--;
+                        pid = fork();
+                        if(pid == 0){
+                                dup2(pipefd_right[1], 1);
+                                dup2(pipefd_left[0], 0);
+                                execvp(arg[0], arg);
+                                perror(arg[0]);
+                                exit(1);
+                        } else {
+                                waitpid(pid, &rez, 0);
+                                close(pipefd_left[0]);
+                                close(pipefd_right[1]);                                        
+                                if(count <= 0){
+                                        goto read_right;      
+                                }
+                                if(pipe(pipefd_left) < 0){
+                                        perror("Error on create pipe");
+                                        exit(1);
+                                }
+                                pos = GetArgements(arg, tmp_arg, str, pos);
+                                count--;
+                                pid = fork();
+                                if(pid == 0){
+                                        dup2(pipefd_right[0], 0);
+                                        dup2(pipefd_left[1], 1);
+                                        execvp(arg[0], arg);
+                                        perror(arg[0]);
+                                        exit(1);
+                                }else{
+                                        waitpid(pid, &rez, 0);
+                                        close(pipefd_right[0]);
+                                        close(pipefd_left[1]);
+                                }
+                        }
+                }
+                goto read_left;
+        
+                read_right:
+                        dup2(pipefd_right[0], 0);
+                        close(pipefd_right[0]);
+                read_left:
+                        dup2(pipefd_left[0], 0);
+                        close(pipefd_left[0]);
+                
+                if(rez != 0)
+                        exit(1);
+                
+                read(0, out, 512);
+                if(out[0] == '\0')
+                        printf("Output is empty.\n");
+                else
+                        printf("%s", out);             
+                
+                exit(0);
+        }
+        
+        return 0;
 }

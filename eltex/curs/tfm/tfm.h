@@ -18,6 +18,9 @@
 #define PBAR_WIN struct mProgressBar
 
 #define CURDIR_SIZE 256
+#define MAX_PARAM 4 //Максимальное количество параметров передаваемое программе
+#define MAX_PARAM_LENGHT 100
+#define INOUT "inout.tfm"
 /*
         row - y - height
         col - x - width
@@ -47,8 +50,9 @@ TREE_WIN {
         char cur_dir[CURDIR_SIZE];
         struct dirent **name_list_d;
 };
+
 /*
-        PBAR_WIN - структура, зранит информацию об окне в котором отображается
+        PBAR_WIN - структура, хранит информацию об окне в котором отображается
                 прогресс (копирования)
 */
 PBAR_WIN {
@@ -65,6 +69,23 @@ struct mCopyInfo {
         int from_flags;
 };
 
+/*
+
+*/
+#define CLINE struct mComandLine
+#define CLINE_LENGHT 512
+#define ARG_LENGHT 5+2
+#define ARG_U_SIZE 50
+
+CLINE {
+        WINDOW *box;
+        WINDOW *text;
+        char buff[CLINE_LENGHT];
+        int buf_pos;
+        MCURS cursor;
+};
+
+void OnExit();
 void GetWinSize(int *, int *);
 int CheckDname(char *);
 int InitWindowTree(TREE_WIN *, int, int);
@@ -88,3 +109,13 @@ int FileIsRead(struct stat *);
 int FileIsWrite(struct stat *);
 int FileIsExe(struct stat *);
 int IsFileExtension(char *file_name);
+int InitComandLine(CLINE *cline, int x_col, int y_row);
+int MoveCursorToRowCol_CLINE(CLINE *cline, int row, int col);
+int RunComandLine(CLINE *cline);
+int MoveCursorToRight_CLINE(CLINE *cline);
+int MoveCursorToLeft_CLINE(CLINE *cline);
+int AddToClineBuffer(CLINE *cline, char c);
+int EraseFromClineBuffer(CLINE *cline);
+int OnPressEnter_CLINE(CLINE *cline);
+int GetArgements(char *arg[ARG_LENGHT], char tmp_arg[ARG_LENGHT][ARG_U_SIZE], char *str, int pos);
+int ExecuteLine(char *str);
